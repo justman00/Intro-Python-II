@@ -1,5 +1,5 @@
 from room import Room
-
+import textwrap
 # Declare all the rooms
 
 room = {
@@ -36,9 +36,10 @@ room['treasure'].s_to = room['narrow']
 #
 # Main
 #
+from player import Player
 
 # Make a new player object that is currently in the 'outside' room.
-
+player = Player(room['outside'])
 # Write a loop that:
 #
 # * Prints the current room name
@@ -49,3 +50,36 @@ room['treasure'].s_to = room['narrow']
 # Print an error message if the movement isn't allowed.
 #
 # If the user enters "q", quit the game.
+cards = ['n', 's', 'e', 'w']
+
+
+def check_for_direction(val):
+    if not val:
+        print("You can not go there")
+    else:
+        player.room = val
+
+
+def check_cardinal(direction):
+    if direction not in cards:
+        print("OUPS, seems like such a coordinate does not exit")
+    elif direction == 'n':
+        check_for_direction(player.room.n_to)
+    elif direction == 'e':
+        check_for_direction(player.room.e_to)
+    elif direction == 'w':
+        check_for_direction(player.room.w_to)
+    elif direction == 's':
+        check_for_direction(player.room.s_to)
+
+
+while True:
+    print(f"current room {player.room.name}")
+    print(textwrap.wrap(player.room.description))
+
+    answer = input()
+
+    if answer == 'q':
+        break
+
+    check_cardinal(answer)
