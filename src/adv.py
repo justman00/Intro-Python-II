@@ -1,5 +1,6 @@
 from room import Room
 import textwrap
+from item import Item
 # Declare all the rooms
 
 room = {
@@ -21,6 +22,15 @@ chamber! Sadly, it has already been completely emptied by
 earlier adventurers. The only exit is to the south."""),
 }
 
+# a bunch of items
+a = Item("rock", "huge rock smth")
+b = Item("scissors", "huge scissors smth")
+c = Item("paper", "huge paper smth")
+d = Item("water", "huge water smth")
+e = Item("ipad", "huge ipad smth")
+f = Item("iphone", "huge iphone smth")
+g = Item("python", "huge python smth")
+
 
 # Link rooms together
 
@@ -39,7 +49,19 @@ room['treasure'].s_to = room['narrow']
 from player import Player
 
 # Make a new player object that is currently in the 'outside' room.
-player = Player(room['outside'])
+player = Player('Andy', room['outside'])
+
+player.addItem(a)
+player.addItem(b)
+player.addItem(c)
+
+room['foyer'].addItem(d)
+room['foyer'].addItem(e)
+room['foyer'].addItem(f)
+room['foyer'].addItem(g)
+
+# player.get_items()
+# room['foyer'].get_items()
 # Write a loop that:
 #
 # * Prints the current room name
@@ -51,6 +73,7 @@ player = Player(room['outside'])
 #
 # If the user enters "q", quit the game.
 cards = ['n', 's', 'e', 'w']
+commands = ['add', 'drop', 'get']
 
 
 def check_for_direction(val):
@@ -61,25 +84,48 @@ def check_for_direction(val):
 
 
 def check_cardinal(direction):
-    if direction not in cards:
-        print("OUPS, seems like such a coordinate does not exit")
-    elif direction == 'n':
-        check_for_direction(player.room.n_to)
-    elif direction == 'e':
-        check_for_direction(player.room.e_to)
-    elif direction == 'w':
-        check_for_direction(player.room.w_to)
-    elif direction == 's':
-        check_for_direction(player.room.s_to)
+    check_for_direction(getattr(player.room, f"{direction}_to"))
+
+
+def perform_command(com, itemName):
+    getattr(player, f'{com}Item')
+
+
+def check_command(com, room):
+    command = com[0]
+    itemName = com[1]
+
+    print(command, itemName)
+
+    if command not in commands or not itemName:
+        print("Oups, command not found, you can either get or drop")
+    elif command == 'get':
+        item = room.getItem(itemName)
+        player.addItem(item)
+        room.dropItem(itemName)
+    elif command == 'drop':
+        item = player.getItem(itemName)
+        room.addItem(item)
+        player.dropItem(itemName)
 
 
 while True:
-    print(f"current room {player.room.name}")
+    print(player.room.__str__())
     print(textwrap.wrap(player.room.description))
+    print("Room items:")
+    player.room.get_items()
+    print("Your items:")
+    player.get_items()
 
     answer = input()
 
     if answer == 'q':
         break
 
-    check_cardinal(answer)
+    if answer in cards:
+        check_cardinal(answer)
+    else:
+        answer = answer.split(' ')
+        check_command(answer, player.room)
+
+    print("\n\n")
